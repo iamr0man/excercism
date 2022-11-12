@@ -33,8 +33,9 @@
    * @returns {number[]} the cards with the newCard applied
    */
   export function insertItemAtTop(cards, newCard) {
-    cards.push(newCard)
-    return cards
+    const copyCards = [...cards]
+    copyCards.push(newCard)
+    return copyCards
   }
   /**
    * Remove the card at the 0-based position
@@ -45,8 +46,9 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItem(cards, position) {
-    cards.splice(position, 1)
-    return cards
+    const copyCards = [...cards]
+    copyCards.splice(position, 1)
+    return copyCards
   }
   /**
    * Remove card from the end of the cards array
@@ -56,8 +58,9 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItemFromTop(cards) {
-    cards.pop()
-    return cards
+    const copyCards = [...cards]
+    copyCards.pop()
+    return copyCards
   }
   /**
    * Insert newCard at beginning of the cards array
@@ -68,8 +71,9 @@
    * @returns {number[]} the cards including the new card
    */
   export function insertItemAtBottom(cards, newCard) {
-    cards.unshift(newCard)
-    return cards
+    const copyCards = [...cards]
+    copyCards.unshift(newCard)
+    return copyCards
   }
   /**
    * Remove card from the beginning of the cards
@@ -79,8 +83,9 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItemAtBottom(cards) {
-    cards.shift()
-    return cards
+    const copyCards = [...cards]
+    copyCards.shift()
+    return copyCards
   }
   /**
    * Compare the number of cards with the given stackSize
