@@ -11,7 +11,8 @@
  * @returns {boolean} whether a license is required
  */
 export function needsLicense(kind) {
-	return kind === 'car' || kind === 'truck'
+	const availableLicense = ['car', 'truck']
+	return availableLicense.includes(kind)
 }
 
 /**
