@@ -19,6 +19,10 @@
 //
 // Good luck with that door policy!
 
+const isLineEmpty = (line) => {
+  return line.length === ''
+}
+
 /**
  * Respond with the correct character, given the line of the
  * poem, if this were said at the front door.
@@ -27,6 +31,10 @@
  * @returns {string}
  */
  export function frontDoorResponse(line) {
+   if (isLineEmpty(line)) {
+     throw Error('Empty line.')
+   }
+
     return line[0]
   }
   
@@ -38,6 +46,9 @@
    * @returns {string} the front door password
    */
   export function frontDoorPassword(word) {
+    if (isLineEmpty(word)) {
+      throw Error('Empty line.')
+    }
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   }
   
@@ -49,6 +60,9 @@
    * @returns {string}
    */
   export function backDoorResponse(line) {
+    if (isLineEmpty(line)) {
+      throw Error('Empty line.')
+    }
     const clearLine = line.trim()
     return clearLine[clearLine.length - 1]
   }
@@ -61,6 +75,9 @@
    * @returns {string} the back door password
    */
   export function backDoorPassword(word) {
+    if (isLineEmpty(word)) {
+      throw Error('Empty line.')
+    }
     return frontDoorPassword(word) + ', please';
   }
   
