@@ -36,11 +36,12 @@ export function chooseVehicle(option1, option2) {
  * @returns {number} expected resell price in the dealership
  */
 export function calculateResellPrice(originalPrice, age) {
-	if (age < 3) {
-		return originalPrice * 0.8
-	} else if (age <= 10) {
-		return originalPrice * 0.7
+	const relationAgeToPrice = {
+		3: originalPrice * 0.8,
+		10: originalPrice * 0.7,
+		100: originalPrice * 0.5
 	}
 
-	return originalPrice * 0.5
+	const [, result] = Object.entries(relationAgeToPrice).filter(([maxAge]) =>  age <= Number(maxAge))[0]
+	return result
 }
