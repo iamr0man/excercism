@@ -5,7 +5,7 @@
  * @param {number[]} cards
  * @param {number} position
  *
- * @returns {number} the card
+ * @returns {number|undefined} the card
  */
  export function getItem(cards, position) {
     return cards[position]
@@ -20,9 +20,12 @@
    * @returns {number[]} the cards with the change applied
    */
   export function setItem(cards, position, replacementCard) {
-    const copyCards = [...cards]
-    copyCards.splice(position, 1, replacementCard)
-    return copyCards
+    return cards.map((card, index) => {
+      if (position === index) {
+        cards[position] = replacementCard
+      }
+      return card
+    })
   }
   /**
    * Insert newCard at the end of the cards array
@@ -33,9 +36,7 @@
    * @returns {number[]} the cards with the newCard applied
    */
   export function insertItemAtTop(cards, newCard) {
-    const copyCards = [...cards]
-    copyCards.push(newCard)
-    return copyCards
+    return [...cards, newCard]
   }
   /**
    * Remove the card at the 0-based position
@@ -46,9 +47,7 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItem(cards, position) {
-    const copyCards = [...cards]
-    copyCards.splice(position, 1)
-    return copyCards
+    return cards.filter((card, index) => index !== position)
   }
   /**
    * Remove card from the end of the cards array
@@ -58,9 +57,8 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItemFromTop(cards) {
-    const copyCards = [...cards]
-    copyCards.pop()
-    return copyCards
+    const lastElementIndex = cards.length - 1
+    return cards.filter((card, index) => index !== lastElementIndex)
   }
   /**
    * Insert newCard at beginning of the cards array
@@ -71,9 +69,7 @@
    * @returns {number[]} the cards including the new card
    */
   export function insertItemAtBottom(cards, newCard) {
-    const copyCards = [...cards]
-    copyCards.unshift(newCard)
-    return copyCards
+    return [newCard, ...cards]
   }
   /**
    * Remove card from the beginning of the cards
@@ -83,9 +79,8 @@
    * @returns {number[]} the cards without the removed card
    */
   export function removeItemAtBottom(cards) {
-    const copyCards = [...cards]
-    copyCards.shift()
-    return copyCards
+    const [_, ...rest] = cards
+    return rest
   }
   /**
    * Compare the number of cards with the given stackSize
