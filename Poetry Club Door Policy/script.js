@@ -32,7 +32,7 @@ const isLineEmpty = (line) => {
  */
  export function frontDoorResponse(line) {
    if (isLineEmpty(line)) {
-     throw Error('Empty line.')
+     return ''
    }
 
     return line[0]
@@ -47,7 +47,7 @@ const isLineEmpty = (line) => {
    */
   export function frontDoorPassword(word) {
     if (isLineEmpty(word)) {
-      throw Error('Empty line.')
+      return ''
     }
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   }
