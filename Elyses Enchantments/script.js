@@ -5,10 +5,15 @@
  * @param {number[]} cards
  * @param {number} position
  *
- * @returns {number|undefined} the card
+ * @returns {number|never} the card
  */
  export function getItem(cards, position) {
-    return cards[position]
+    const result = cards[position]
+
+    if (!result) {
+      throw Error('There is no card with this position')
+    }
+    return result
   }
   /**
    * Exchange card with replacementCard at the 0-based position
