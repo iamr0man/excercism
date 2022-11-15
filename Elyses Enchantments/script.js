@@ -20,12 +20,7 @@
    * @returns {number[]} the cards with the change applied
    */
   export function setItem(cards, position, replacementCard) {
-    return cards.map((card, index) => {
-      if (position === index) {
-        cards[position] = replacementCard
-      }
-      return card
-    })
+    return cards.map((card, index) => position === index ? replacementCard : card)
   }
   /**
    * Insert newCard at the end of the cards array
