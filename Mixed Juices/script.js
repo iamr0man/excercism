@@ -41,13 +41,14 @@ export function limesToCut(wedgesNeeded, limes) {
 		large: 10,
 	}
 
+	if (!wedgesNeeded) {
+		return 0
+	}
+
 	let limeCount = 0
 	let generalCountOfWedges = 0
 
-	const isNotEndOfLimes = limeCount !== limes.length
-	const needMoreWedges = generalCountOfWedges <= wedgesNeeded
-
-	while (needMoreWedges && isNotEndOfLimes && wedgesNeeded) {
+	while (limeCount !== limes.length && generalCountOfWedges <= wedgesNeeded) {
 		generalCountOfWedges += relationSizeToWadges[limes[limeCount]]
 		limeCount++
 	}
