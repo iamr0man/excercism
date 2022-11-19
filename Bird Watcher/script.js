@@ -38,6 +38,7 @@ export function fixBirdCountLog(birdsPerDay) {
 	}
 
 	return birdsPerDay.reduce((result, birdCount, index) => {
-		return index % 2 === 0 ? result.concat(birdCount + 1) : result.concat(birdCount)
+		const fixCount = index % 2 === 0 ? 1 : 0
+		return [...result, birdCount + fixCount]
 	}, [])
 }
