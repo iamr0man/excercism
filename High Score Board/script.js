@@ -21,8 +21,10 @@ export function createScoreBoard() {
  * @returns {Record<string, number>} updated score board
  */
 export function addPlayer(scoreBoard, player, score) {
-	scoreBoard[player] = score
-	return scoreBoard
+	return {
+		...scoreBoard,
+		[player]: score
+	}
 }
 
 /**
@@ -30,11 +32,15 @@ export function addPlayer(scoreBoard, player, score) {
  *
  * @param {Record<string, number>} scoreBoard
  * @param {string} player
- * @returns {Record<string, number>} updated score board
+ * @returns {Record<string, number>|never} updated score board
  */
 export function removePlayer(scoreBoard, player) {
-	delete scoreBoard[player]
-	return scoreBoard
+	if (!scoreBoard[player]) {
+		throw Error('This player does not exist')
+	}
+
+	const { [player]: removedProperty, ...rest } = scoreBoard
+	return rest
 }
 
 /**
@@ -43,11 +49,14 @@ export function removePlayer(scoreBoard, player) {
  * @param {Record<string, number>} scoreBoard
  * @param {string} player
  * @param {number} points
- * @returns {Record<string, number>} updated score board
+ * @returns {Record<string, number>|never} updated score board
  */
 export function updateScore(scoreBoard, player, points) {
-	scoreBoard[player] += points
-	return scoreBoard
+	if (!scoreBoard[player]) {
+		throw Error('This player does not exist')
+	}
+
+	return addPlayer(scoreBoard, player, points)
 }
 
 /**
@@ -58,11 +67,23 @@ export function updateScore(scoreBoard, player, points) {
  */
 export function applyMondayBonus(scoreBoard) {
 	const BONUS_AMOUNT = 100
-	for (let key in scoreBoard) {
-		scoreBoard[key] += BONUS_AMOUNT
+	const scoreBoardCopy = { ...scoreBoard }
+	for (let key in scoreBoardCopy) {
+		scoreBoardCopy[key] += BONUS_AMOUNT
 	}
-	return scoreBoard
+	return scoreBoardCopy
 }
+
+/**
+ * Custom data type defining params of normalize score function
+ * @typedef {Object} Params
+ * @property {{ (score: number): number }} normalizeFunction - callback function
+ * @property {number} score - score
+ */
+
+/**
+ * @type {Params}
+ */
 
 /**
  * Normalizes a score with the provided normalization function.
