@@ -59,6 +59,14 @@ export function updateScore(scoreBoard, player, points) {
 	return addPlayer(scoreBoard, player, points)
 }
 
+function accumulateBonus (newScoreBoard, currentPlayer) {
+	const BONUS_AMOUNT = 100
+
+	const [key, value] = currentPlayer
+	newScoreBoard[key] = value + BONUS_AMOUNT
+	return newScoreBoard
+}
+
 /**
  * Applies 100 bonus points to all players on the board.
  *
@@ -66,12 +74,7 @@ export function updateScore(scoreBoard, player, points) {
  * @returns {Record<string, number>} updated score board
  */
 export function applyMondayBonus(scoreBoard) {
-	const BONUS_AMOUNT = 100
-	const scoreBoardCopy = { ...scoreBoard }
-	for (let key in scoreBoardCopy) {
-		scoreBoardCopy[key] += BONUS_AMOUNT
-	}
-	return scoreBoardCopy
+	return Object.entries(scoreBoard).reduce(accumulateBonus, {})
 }
 
 /**
