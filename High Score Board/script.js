@@ -63,8 +63,10 @@ function accumulateBonus (newScoreBoard, currentPlayer) {
 	const BONUS_AMOUNT = 100
 
 	const [key, value] = currentPlayer
-	newScoreBoard[key] = value + BONUS_AMOUNT
-	return newScoreBoard
+	return {
+		...newScoreBoard,
+		[key]: value + BONUS_AMOUNT
+	}
 }
 
 /**
