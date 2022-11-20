@@ -24,8 +24,10 @@ export function createVisitor(name, age, ticketId) {
  * @returns {Visitor} the visitor without a ticket
  */
 export function revokeTicket(visitor) {
-	visitor.ticketId = null
-	return visitor
+	return {
+		...visitor,
+		ticketId: null
+	}
 }
 
 /**
@@ -38,14 +40,14 @@ export function revokeTicket(visitor) {
 export function ticketStatus(tickets, ticketId) {
 	const ticketIdentifier = tickets[ticketId]
 
-	if (ticketIdentifier === null) {
-		return 'not sold'
+	switch (ticketIdentifier) {
+		case null:
+			return 'not sold'
+		case undefined:
+			return 'unknown ticket id'
+		default:
+			return `sold to ${ticketIdentifier}`
 	}
-	if (ticketIdentifier === undefined) {
-		return 'unknown ticket id'
-	}
-
-	return `sold to ${ticketIdentifier}`
 }
 
 /**
