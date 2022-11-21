@@ -38,11 +38,11 @@ export function chooseVehicle(option1, option2) {
  */
 export function calculateResellPrice(originalPrice, age) {
 	const relationAgeToPrice = {
-		3: originalPrice * 0.8,
-		10: originalPrice * 0.7,
-		100: originalPrice * 0.5
+		3: 0.8,
+		10: 0.7,
+		100: 0.5
 	}
 
-	const [, result] = Object.entries(relationAgeToPrice).filter(([maxAge]) =>  age <= Number(maxAge))[0]
-	return result
+	const [, result] = Object.entries(relationAgeToPrice).find(([maxAge]) => age <= Number(maxAge))
+	return result * originalPrice
 }
