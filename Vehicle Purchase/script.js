@@ -43,6 +43,9 @@ export function calculateResellPrice(originalPrice, age) {
 		100: 0.5
 	}
 
-	const [, result] = Object.entries(relationAgeToPrice).find(([maxAge]) => age <= Number(maxAge))
-	return result * originalPrice
+	const checkAge = (maxAge) => age <= Number(maxAge)
+	const [, yearCoefficient] = Object.entries(relationAgeToPrice).find(checkAge)
+	const modifyPrice = () => originalPrice * yearCoefficient
+
+	return modifyPrice()
 }
