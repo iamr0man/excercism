@@ -26,18 +26,17 @@ export function preparationTime(layers, averagePreperation = 2) {
 	return layers.length * averagePreperation
 }
 
-function quantityAccumulator(acc, currentLayer) {
+function quantityReducer(acc, currentLayer) {
 	const relationLayerToQuantity = {
 		noodles: 50,
 		sauce: 0.2
 	}
 
-	const currentLayerQuantity = acc[currentLayer]
 	const extraQuantity = relationLayerToQuantity[currentLayer]
-
-	if (!relationLayerToQuantity.hasOwnProperty(currentLayer)) {
+	if (!extraQuantity) {
 		return acc
 	}
+	const currentLayerQuantity = acc[currentLayer]
 
 	return {
 		...acc,
@@ -50,7 +49,7 @@ export function quantities(layers) {
 		noodles: 0,
 		sauce: 0,
 	}
-	return layers.reduce(quantityAccumulator, baseObject)
+	return layers.reduce(quantityReducer, baseObject)
 }
 
 export function addSecretIngredient(friendsList, myList) {
@@ -66,5 +65,5 @@ export function scaleRecipe(recipe, portions) {
 			...acc,
 			[key]: value * coefficient
 		}
-	}, { ...recipe })
+	}, recipe)
 }
