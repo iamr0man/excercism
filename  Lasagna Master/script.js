@@ -65,5 +65,5 @@ export function scaleRecipe(recipe, portions) {
 			...acc,
 			[key]: value * coefficient
 		}
-	}, recipe)
+	}, {})
 }
