@@ -38,6 +38,18 @@ export function luckyNumber(value) {
 	return stringValue.length % 2 === 0 ? checkEvenLength() : checkOddLength()
 }
 
+function palindrome(number) {
+	let remain, temp, final = 0;
+
+	temp = number;
+	while (number > 0) {
+		remain = number % 10;
+		number = parseInt(number / 10);
+		final = final * 10 + remain;
+	}
+	return final === temp
+}
+
 /**
  * Determines the error message that should be shown to the user
  * for the given input value.
