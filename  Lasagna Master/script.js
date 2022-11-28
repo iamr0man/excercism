@@ -33,10 +33,11 @@ function quantityReducer(acc, currentLayer) {
 	}
 
 	const extraQuantity = relationLayerToQuantity[currentLayer]
-	if (!extraQuantity) {
-		return acc
-	}
 	const currentLayerQuantity = acc[currentLayer]
+
+	if (!extraQuantity || !currentLayerQuantity) {
+		return acc;
+	}
 
 	return {
 		...acc,
