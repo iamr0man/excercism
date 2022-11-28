@@ -37,15 +37,22 @@ export function chooseVehicle(option1, option2) {
  * @returns {number} expected resell price in the dealership
  */
 export function calculateResellPrice(originalPrice, age) {
-	const relationAgeToPrice = {
-		3: 0.8,
-		10: 0.7,
-		100: 0.5
-	}
+	const relationAgeToPrice = [
+		{
+			checkAge: (age) => 3 <= age,
+			modifyPrice: (price) => price * 0.8
+		},
+		{
+			checkAge: (age) => 10 <= age,
+			modifyPrice: (price) => price * 0.7
+		},
+		{
+			checkAge: (age) => 100 <= age,
+			modifyPrice: (price) => price * 0.5
+		},
+	]
 
-	const checkAge = (maxAge) => age <= Number(maxAge)
-	const [, yearCoefficient] = Object.entries(relationAgeToPrice).find(checkAge)
-	const modifyPrice = () => originalPrice * yearCoefficient
+	const relation = relationAgeToPrice.find(relation => relation.checkAge(age))
 
-	return modifyPrice()
+	return relation.modifyPrice(originalPrice)
 }
