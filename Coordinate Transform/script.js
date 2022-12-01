@@ -58,35 +58,13 @@ export function composeTransform(f, g) {
  *  if the arguments are the same on subsequent calls, or compute a new result if they are different.
  */
 export function memoizeTransform(f) {
-	let cacheMap = []
-
-	const [memoX, memoY] = f()
-	const params = { memoX, memoY }
-
+	let memoX, memoY, result;
 	return (x, y) => {
-		const innerParams = { x, y }
-		const updateElement = cacheMap.find(item => {
-			return JSON.stringify({ params: item.params, innerParams: item.innerParams }) === JSON.stringify({ params, innerParams })
-		})
-
-		if (updateElement?.value?.length > 0) {
-			return updateElement.value
+		if (memoX !== x && memoY !== y) {
+			memoX = x;
+			memoY = y;
+			result = f(x, y);
 		}
-
-		const value = f(x, y)
-		if (!value) {
-			return [memoX, memoY]
-		}
-
-		const newElement = {
-			params,
-			innerParams,
-			value
-		}
-
-		const newCacheCopy = cacheMap.filter(item => item.params === params && item.innerParams !== innerParams)
-		cacheMap = [...newCacheCopy, newElement]
-
-		return newElement.value
-	}
+		return result;
+	};
 }
