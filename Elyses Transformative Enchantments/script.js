@@ -24,8 +24,7 @@ export function threeOfEachThree(deck) {
 			const triplicateArray = [3,3,3]
 			return [...acc, ...triplicateArray]
 		}
-		acc.push(curr)
-		return acc
+		return [...acc, curr]
 	}, [])
 }
 
