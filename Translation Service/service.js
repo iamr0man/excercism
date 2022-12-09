@@ -8,7 +8,10 @@
 //
 // In your own projects, files, and code, you can play with @ts-check as well.
 
-export class TranslationService {
+import { NotAvailable } from "./errors.js";
+import { ExternalApi } from './api.js'
+
+class TranslationService {
 	/**
 	 * Creates a new service
 	 * @param {ExternalApi} api the original api
@@ -50,6 +53,8 @@ export class TranslationService {
 		})
 	}
 
+	counter = 0
+
 	/**
 	 * Requests the service for some text to be translated.
 	 *
@@ -60,9 +65,20 @@ export class TranslationService {
 	 * @returns {Promise<void>}
 	 */
 	request(text) {
-		return new Promise((resolve, reject) => {
-			return this.api.fetch(text).then(resolve)
-		})
+		const innerRequest = (counter) => {
+			return new Promise((resolve, reject) => {
+				this.api.request(text, (error) => {
+					if (error) return reject(error)
+					resolve()
+				})
+			}).catch((error) => {
+				if (counter < 2) {
+					return innerRequest(counter + 1)
+				}
+				return Promise.reject(error)
+			})
+		}
+		return innerRequest(0)
 	}
 
 	/**
@@ -76,7 +92,23 @@ export class TranslationService {
 	 * @returns {Promise<string>}
 	 */
 	premium(text, minimumQuality) {
-		throw new Error('Implement the premium function');
+		const innerRequest = () => {
+			return new Promise((resolve, reject) => {
+				this.api.fetch(text).then((value) => {
+					if (minimumQuality <= value.quality) {
+						resolve(value.translation)
+						return
+					}
+					reject(new QualityThresholdNotMet(text))
+				}).catch((error) => {
+					this.api.request(text, (innerError) => {
+						if (innerError) return reject(error)
+						return innerRequest()
+					})
+				})
+			})
+		}
+		return innerRequest()
 	}
 }
 
@@ -84,7 +116,7 @@ export class TranslationService {
  * This error is used to indicate a translation was found, but its quality does
  * not meet a certain threshold. Do not change the name of this error.
  */
-export class QualityThresholdNotMet extends Error {
+class QualityThresholdNotMet extends Error {
 	/**
 	 * @param {string} text
 	 */
@@ -103,7 +135,7 @@ The translation of ${text} does not meet the requested quality threshold.
  * This error is used to indicate the batch service was called without any
  * texts to translate (it was empty). Do not change the name of this error.
  */
-export class BatchIsEmpty extends Error {
+class BatchIsEmpty extends Error {
 	constructor() {
 		super(
 			`
@@ -112,3 +144,14 @@ Requested a batch translation, but there are no texts in the batch.
 		);
 	}
 }
+
+const mockValues = {
+	'majQa’': [ { translation: 'Well done', quality: 90 } ],
+	'jIyajbe’': [ null, { translation: "I don't understand", quality: 100 } ],
+	'ghobe’': [ null, null, null, null, { translation: 'No!', quality: 100 } ],
+	'‘arlogh Qoylu’pu’?': [ null, { translation: 'What time is it?', quality: 75 } ]
+}
+
+const api = new ExternalApi(mockValues)
+const service = new TranslationService(api)
+const res = service.premium("jIyajbe’", 95).then((res) => console.log(res)).catch((error) => console.error(error))
