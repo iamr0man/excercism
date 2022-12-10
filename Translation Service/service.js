@@ -8,7 +8,6 @@
 //
 // In your own projects, files, and code, you can play with @ts-check as well.
 
-import { NotAvailable } from "./errors.js";
 import { ExternalApi } from './api.js'
 
 class TranslationService {
@@ -92,23 +91,22 @@ class TranslationService {
 	 * @returns {Promise<string>}
 	 */
 	premium(text, minimumQuality) {
-		const innerRequest = () => {
-			return new Promise((resolve, reject) => {
-				this.api.fetch(text).then((value) => {
-					if (minimumQuality <= value.quality) {
-						resolve(value.translation)
-						return
-					}
-					reject(new QualityThresholdNotMet(text))
-				}).catch((error) => {
-					this.api.request(text, (innerError) => {
-						if (innerError) return reject(error)
-						return innerRequest()
-					})
+		return this.api
+			.fetch(text)
+			.catch(() => {
+				return new Promise((resolve, reject) => {
+					return this.request(text)
+						.then(() => this.api.fetch(text))
+						.then((result) => resolve(result))
+						.catch(error => reject(error))
 				})
 			})
-		}
-		return innerRequest()
+			.then((value) => {
+				if (minimumQuality <= value.quality) {
+					return value.translation
+				}
+				throw new QualityThresholdNotMet(value.translation)
+			})
 	}
 }
 
@@ -154,4 +152,4 @@ const mockValues = {
 
 const api = new ExternalApi(mockValues)
 const service = new TranslationService(api)
-const res = service.premium("jIyajbe’", 95).then((res) => console.log(res)).catch((error) => console.error(error))
+service.premium("‘arlogh Qoylu’pu’?", 100).then(v => console.log(v))
