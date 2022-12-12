@@ -7,25 +7,23 @@
  */
 
 export class Size {
-	width = 80
-	height = 60
+	width = 0
+	height = 0
 
 	constructor(width, height) {
-		if (width) {
-			this.width = width
-		}
-		if (height) {
-			this.height = height
-		}
+		this.width = width
+		this.height = height
 	}
 
 	resize(newWidth, newHeight) {
-		if (newWidth) {
-			this.width = newWidth
+		if (newWidth < 1 || newHeight < 1) {
+			this.width = 1
+			this.height = 1
+			return
 		}
-		if (newHeight) {
-			this.height = newHeight
-		}
+
+		this.width = newWidth
+		this.height = newHeight
 	}
 }
 
@@ -34,69 +32,73 @@ export class Position {
 	y = 0
 
 	constructor(x, y) {
-		if (x) {
-			this.x = x
-		}
-		if (y) {
-			this.y = y
-		}
+		this.x = x
+		this.y = y
 	}
 
 	move (x, y) {
-		if (x) {
-			this.x = x
+		if (x < 1 || y < 1) {
+			this.x = 0
+			this.y = 0
+			return
 		}
-		if (y) {
-			this.y = y
-		}
+
+		this.x = x
+		this.y = y
 	}
 }
 
 export class ProgramWindow {
-	screenSize = new Size(800, 600)
-	size = new Size()
-	position = new Position()
+	screenSize = null
+	size = null
+	position = null
 
-	constructor() {}
+	constructor(screenSize, size, position) {
+		if (screenSize) {
+			this.screenSize = new Size(...screenSize)
+		}
+		if (size) {
+			this.size = new Size(...size)
+		}
+		if (position) {
+			this.position = new Position(...position)
+		}
+	}
 
 	isCoordinatesOutOfBoundaries (newCoordinates) {
-		return this.screenSize.width < newCoordinates.x || this.screenSize.height < newCoordinates.y
+		return this.screenSize.width < (newCoordinates.x + this.size.width) || this.screenSize.height < (newCoordinates.y + this.size.height)
 	}
 
 	isSizeOutOfBoundaries (newSize) {
-		return this.screenSize.width < newSize.width || this.screenSize.height < newSize.height
+		return this.screenSize.width < (newSize.width + this.position.x) || this.screenSize.height < (newSize.height + this.position.y)
 	}
 
 	move (position) {
-		if (this.isCoordinatesOutOfBoundaries(position)) {
-			this.position = new Position(this.screenSize.width - this.size.width, this.screenSize.height - this.size.height)
-			return this
-		}
-		if (position.x < 1 || position.y < 1) {
-			this.position = new Position(0, 0)
-			return this
+		if (!this.isCoordinatesOutOfBoundaries(position)) {
+			const newX = this.screenSize.width - this.size.width
+			const newY = this.screenSize.height - this.size.height
+			this.position.move(newX, newY)
+			return
 		}
 
 		this.position = position
-		return this
 	}
 
 	resize (newSize) {
 		if (this.isSizeOutOfBoundaries(newSize)) {
-			this.size = new Size(this.screenSize.width - this.position.x, this.screenSize.height - this.position.y)
-			return this
-		}
+			const newWidth = this.screenSize.width - this.position.x
+			const newHeight = this.screenSize.height - this.position.y
 
-		if (newSize.width < 1 || newSize.height < 1) {
-			this.size = new Size(1, 1)
-			return this
+			this.size.resize(newWidth, newHeight)
+			return
 		}
 
 		this.size = newSize
-		return this
 	}
 }
 
 export function changeWindow (programWindow) {
-	return programWindow.resize(new Size(400, 300)).move(new Position(100, 150))
+	programWindow.resize(new Size(400, 300))
+	programWindow.move(new Position(100, 150))
+	return programWindow
 }
