@@ -94,12 +94,10 @@ class TranslationService {
 		return this.api
 			.fetch(text)
 			.catch(() => {
-				return new Promise((resolve, reject) => {
-					return this.request(text)
-						.then(() => this.api.fetch(text))
-						.then((result) => resolve(result))
-						.catch(error => reject(error))
-				})
+				return this.request(text)
+					.then(() => this.api.fetch(text))
+					.then((result) => Promise.resolve(result))
+					.catch(error => Promise.reject(error))
 			})
 			.then((value) => {
 				if (minimumQuality <= value.quality) {
@@ -152,4 +150,4 @@ const mockValues = {
 
 const api = new ExternalApi(mockValues)
 const service = new TranslationService(api)
-service.premium("‘arlogh Qoylu’pu’?", 100).then(v => console.log(v))
+service.premium("‘arlogh Qoylu’pu’?", 65).then(v => console.log(v))
