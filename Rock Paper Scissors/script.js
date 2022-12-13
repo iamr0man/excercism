@@ -35,6 +35,11 @@ pointsPerShapeMap.set(ROCK, 1)
 pointsPerShapeMap.set(PAPER, 2)
 pointsPerShapeMap.set(SCISSORS, 3)
 
+const contractWinMap = new Map()
+contractWinMap.set('X', LOSE)
+contractWinMap.set('Y', DRAW)
+contractWinMap.set('Z', WIN)
+
 const getEncryptedChoose = (opponentEncrypt, ownEncrypt) => {
 	const opponent = opponentEncryptMap.get(opponentEncrypt)
 	const own = ownEncryptMap.get(ownEncrypt)
@@ -58,6 +63,25 @@ const checkWinner = (opponent, own) => {
 	}
 }
 
+const findStrongShape = (shape) => {
+	for (let [key, value] of winRelation.entries()){
+		if (value === shape) {
+			return key
+		}
+	}
+}
+
+const getOwnShape = (status, opponent, own) => {
+	switch (status) {
+		case LOSE:
+			return winRelation.get(opponent)
+		case DRAW:
+			return opponent
+		case WIN:
+			return findStrongShape(opponent)
+	}
+}
+
 const result = gameRows.reduce((acc, curr) => {
 	if (!curr) {
 		return acc
@@ -65,9 +89,13 @@ const result = gameRows.reduce((acc, curr) => {
 
 	const [opponentEncrypt, ownEncrypt] = curr.split(' ')
 	const [opponent, own] = getEncryptedChoose(opponentEncrypt, ownEncrypt)
-	const status = checkWinner(opponent, own)
+
+	const status = contractWinMap.get(ownEncrypt)
 	const pointsPerGame = pointsPerGameStatusMap.get(status)
-	const pointsPerShape = pointsPerShapeMap.get(own)
+
+	const ownShape = getOwnShape(status, opponent, own)
+	const pointsPerShape = pointsPerShapeMap.get(ownShape)
+
 	return acc + pointsPerGame + pointsPerShape
 }, 0)
 
