@@ -54,15 +54,9 @@ export class ProgramWindow {
 	position = null
 
 	constructor(screenSize, size, position) {
-		if (screenSize) {
-			this.screenSize = new Size(...screenSize)
-		}
-		if (size) {
-			this.size = new Size(...size)
-		}
-		if (position) {
-			this.position = new Position(...position)
-		}
+		this.screenSize = new Size(...screenSize)
+		this.size = new Size(...size)
+		this.position = new Position(...position)
 	}
 
 	isCoordinatesOutOfBoundaries (newCoordinates) {
@@ -78,10 +72,11 @@ export class ProgramWindow {
 			const newX = this.screenSize.width - this.size.width
 			const newY = this.screenSize.height - this.size.height
 			this.position.move(newX, newY)
-			return
+			return this
 		}
 
 		this.position = position
+		return this
 	}
 
 	resize (newSize) {
@@ -90,15 +85,13 @@ export class ProgramWindow {
 			const newHeight = this.screenSize.height - this.position.y
 
 			this.size.resize(newWidth, newHeight)
-			return
+			return this
 		}
-
 		this.size = newSize
+		return this
 	}
 }
 
 export function changeWindow (programWindow) {
-	programWindow.resize(new Size(400, 300))
-	programWindow.move(new Position(100, 150))
-	return programWindow
+	return programWindow.resize(new Size(400, 300)).move(new Position(100, 150))
 }
