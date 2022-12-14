@@ -43,16 +43,16 @@ class TranslationService {
 	 * @returns {Promise<string[]>}
 	 */
 	batch(texts) {
+		const getTranslationPromise = (text) => this.api.fetch(text).then(value => value.translation)
+
 		return new Promise((resolve, reject) => {
 			if (texts.length === 0) {
 				reject(new BatchIsEmpty())
 			}
-			const promises = texts.map((text) => this.api.fetch(text).then(value => value.translation))
-			resolve(Promise.all(promises).then((value) => value))
-		})
+			const promises = texts.map(getTranslationPromise)
+			resolve(Promise.all(promises))
+		}).then((value) => value)
 	}
-
-	counter = 0
 
 	/**
 	 * Requests the service for some text to be translated.
@@ -96,8 +96,8 @@ class TranslationService {
 			.catch(() => {
 				return this.request(text)
 					.then(() => this.api.fetch(text))
-					.then((result) => Promise.resolve(result))
-					.catch(error => Promise.reject(error))
+					.then((result) => result)
+					.catch(error => error)
 			})
 			.then((value) => {
 				if (minimumQuality <= value.quality) {
