@@ -10,14 +10,14 @@ const result = rows.reduce((acc, curr) => {
 	const [startOfFirstRange, endOfFirstRange] = formatRange(firstRange)
 	const [startOfSecondRange, endOfSecondRange] = formatRange(secondRange)
 
-	if (startOfFirstRange <= startOfSecondRange && endOfFirstRange >= endOfSecondRange) {
-		return acc + 1
+	if (endOfFirstRange < startOfSecondRange) { //18-46,56-100
+		return acc
 	}
-	if (startOfFirstRange >= startOfSecondRange && endOfFirstRange <= endOfSecondRange) {
-		return acc + 1
+	if (startOfFirstRange > endOfSecondRange && endOfFirstRange > endOfSecondRange) {// 64-64,12-63
+		return acc
 	}
 
-	return acc
+	return acc + 1
 }, 0)
 
 console.log(result)
