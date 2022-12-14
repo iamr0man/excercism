@@ -1,6 +1,6 @@
 import { stringData } from "./data.js";
 
-const bags = stringData.split(/\n/g)
+const [emptyString, ...rows] = stringData.split(/\n/g)
 
 const getLettersCounter = (string) => {
 	return string.split('').reduce((acc, curr) => {
@@ -39,22 +39,37 @@ const calculate = (element) => {
 	return elementCharCode - 96
 }
 
-const result = bags.reduce((acc, curr) => {
-	if (!curr) {
+const perChunk = 6
+const bags = rows.reduce((resultArray, item, index) => {
+	const chunkIndex = Math.floor(index / perChunk)
+
+	if(!resultArray[chunkIndex]) {
+		resultArray[chunkIndex] = []
+	}
+
+	resultArray[chunkIndex].push(item)
+
+	return resultArray
+}, [])
+
+const findMultipleIntersections = (data,) => {
+	return data.reduce((a, b) => a.filter(c => b.includes(c)));
+}
+
+const result = bags.reduce((acc, curr, index) => {
+	if (curr.length === 1) {
 		return acc
 	}
-	const half = Math.ceil(curr.length / 2)
 
-	const firstHalf = curr.slice(0, half)
-	const secondHalf = curr.slice(half)
+	const firstHalf = curr.slice(0, 3).map(item => item.split(''))
+	const secondHalf = curr.slice(3).map(item => item.split(''))
 
-	const firstHalfCounter = getLettersCounter(firstHalf)
-	const secondHalfCounter = getLettersCounter(secondHalf)
+	const firstHalfIntersection = findMultipleIntersections(firstHalf)[0]
+	const secondHalfIntersection = findMultipleIntersections(secondHalf)[0]
 
-	const element = findRepeatElement(firstHalfCounter, secondHalfCounter)
+	const value = calculate(firstHalfIntersection) + calculate(secondHalfIntersection)
 
-	const calculateValue = calculate(element)
-	return acc + calculateValue
+	return acc + value
 }, 0)
 
 console.log(result);
