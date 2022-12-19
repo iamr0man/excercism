@@ -6,13 +6,12 @@ function isUnique (tempString, buffer, offset) {
 	return uniqueSequence.size === offset
 }
 
-function findUniqueSequence (buffer, offset = 4) {
+function findUniqueSequence (buffer, offset) {
 	if (buffer.length < offset) {
 		return null;
 	}
 
-	const startIndex = 3
-	let tempString = buffer.slice(startIndex, offset + startIndex);
+	let tempString = buffer.slice(0, offset);
 
 	for (let i = offset; i < buffer.length; i++) {
 		if (isUnique(tempString, buffer, offset)) {
@@ -25,4 +24,4 @@ function findUniqueSequence (buffer, offset = 4) {
 	return null;
 }
 
-console.log(findUniqueSequence(stringData, 4));
+console.log(findUniqueSequence(stringData, 14));
