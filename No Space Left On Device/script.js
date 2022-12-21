@@ -1,98 +1,99 @@
 import { stringData, testData } from "./data.js";
-const rows = stringData.replace(/\$ /g, '').split(/\n/g)
 
-let currentDirectory = null
+let currentDirectory = '';
+let directories = {};
 
-const tree = {}
+function processLine(line) {
+	let isCommand = line.indexOf('$') === 0;
 
-rows.forEach((command, index) => {
-	const [firstArgument, secondArgument] = command.split(' ')
-
-	if (firstArgument === 'ls' || firstArgument === 'dir') {
+	if (isCommand) {
+		processCommand(line);
 		return;
 	}
 
-	if (firstArgument === 'cd') {
-		if (secondArgument === '/') {
-			tree[secondArgument] = {
-				children: [],
-				parent: null,
-				size: 0
+	processEntry(line);
+}
+
+function getParentDirectory (currentDirectory, path) {
+	return currentDirectory
+		.split('/')
+		.slice(0, path.length - 1)
+		.join('/')
+}
+
+function processCommand(command) {
+	const directoryCommand = '$ cd ';
+
+	if (command.indexOf(directoryCommand) < 0) {
+		return;
+	}
+
+	let targetDirectory = command.replace(directoryCommand, '');
+
+	if (targetDirectory === '/') {
+		currentDirectory = '/';
+		return;
+	}
+
+	if (targetDirectory === '..') {
+		const path = currentDirectory.split('/')
+		currentDirectory = getParentDirectory(currentDirectory, path) || '/';
+
+		return;
+	}
+
+	const prefix = currentDirectory === '/' ? '' : '/'
+	currentDirectory += prefix + targetDirectory;
+}
+
+function processEntry(entry) {
+	if (entry.indexOf('dir') === 0) {
+		return;
+	}
+
+	let [size] = entry.split(' ');
+	size = parseInt(size);
+
+	currentDirectory
+		.replace(/\//g, ' / ')
+		.split(' ')
+		.reverse()
+		.reduce((path, directory, index) => {
+			if (!path || (directory === '/' && path !== '/')) {
+				return (getParentDirectory(path, currentDirectory)) || '/';
 			}
-			currentDirectory = tree[secondArgument]
-			return
-		}
-		if (secondArgument === '..') {
-			currentDirectory = currentDirectory.parent
-			return;
-		}
- 		currentDirectory.children.push({
-			name: secondArgument,
-			parent: currentDirectory,
-			children: [],
-			size: 0
-		})
-		currentDirectory = currentDirectory.children.find(file => file.name === secondArgument)
-		return;
-	}
 
-	const file = firstArgument.match(/\d+/g)
-	const isFile = file.length > 0
+			if (currentDirectory === '/' && index) {
+				return '/';
+			}
 
-	if (isFile) {
-		currentDirectory.children.push({
-			name: secondArgument,
-			parent: currentDirectory,
-			size: +file
-		})
-	}
-})
+			if (!directories[path]) {
+				directories[path] = {
+					size: 0,
+				};
+			}
 
-console.log(tree);
+			directories[path].size += size;
 
-function *postOrderTraversal(node) {
-	if (node.children && node.children) {
-		for (let child of node.children.values()) {
-			yield* postOrderTraversal(child);
-		}
-	}
-
-	yield node;
+			return path.replace(`/${directory}`, '');
+		}, currentDirectory);
 }
 
-const root = tree['/']
+stringData.split('\n').forEach(processLine);
 
-// first
-for (let node of postOrderTraversal(root)) {
-	if (!!node.parent) {
-		node.parent.size += node.size
-	}
-}
+let answer1 = Object.keys(directories)
+	.filter(directory => directories[directory].size <= 100000)
+	.reduce((sizeSum, directory) => sizeSum + directories[directory].size, 0);
 
-function *preOrderTraversal (node) {
-	yield node;
-
-	if (node.children && node.children) {
-		for (let child of node.children.values()) {
-			yield* preOrderTraversal(child);
-		}
-	}
-}
-
-// second
 const availableDiskSpace = 70000000
-const freeSpace = availableDiskSpace - root.size
+const freeSpace = availableDiskSpace - directories['/'].size
 const minimumRequiredUpdate = 30000000
 const spaceToDelete = minimumRequiredUpdate - freeSpace
 
-let bigDirs = []
+let answer2 = Math.min(
+	...Object.keys(directories)
+		.filter(directory => directories[directory].size >= spaceToDelete)
+		.map(directory => directories[directory].size)
+);
 
-for (let node of preOrderTraversal(root)) {
-	if (node.size > spaceToDelete && node.children) {
-		bigDirs = [...bigDirs, node]
-	}
-}
-
-const sortedBigDirs = bigDirs.sort((a, b) => a.size - b.size)
-
-console.log(sortedBigDirs[0].size);
+console.log(answer1, answer2);
