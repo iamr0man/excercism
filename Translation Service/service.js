@@ -64,20 +64,19 @@ class TranslationService {
 	 * @returns {Promise<void>}
 	 */
 	request(text) {
-		const innerRequest = (counter) => {
+		const promisify = () => {
 			return new Promise((resolve, reject) => {
-				this.api.request(text, (error) => {
+				const promiseCallback = (error) => {
 					if (error) return reject(error)
-					resolve()
-				})
-			}).catch((error) => {
-				if (counter < 2) {
-					return innerRequest(counter + 1)
+					return resolve()
 				}
-				return Promise.reject(error)
+
+				this.api.request(text, promiseCallback)
 			})
 		}
-		return innerRequest(0)
+		return promisify()
+			.catch(promisify)
+			.catch(promisify)
 	}
 
 	/**
@@ -96,7 +95,6 @@ class TranslationService {
 			.catch(() => {
 				return this.request(text)
 					.then(() => this.api.fetch(text))
-					.then((result) => result)
 					.catch(error => error)
 			})
 			.then((value) => {
@@ -150,4 +148,5 @@ const mockValues = {
 
 const api = new ExternalApi(mockValues)
 const service = new TranslationService(api)
-service.premium("‘arlogh Qoylu’pu’?", 65).then(v => console.log(v))
+service.request('jIyajbe').then(v => console.log(v))
+// service.premium("‘arlogh Qoylu’pu’?", 65).then(v => console.log(v))
