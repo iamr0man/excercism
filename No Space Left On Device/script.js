@@ -1,116 +1,56 @@
-import { stringData, testData } from "./data.js";
+import { FileSystem, Directory } from "./helpers.js";
 
+import { stringData } from "./data.js";
 const rows = stringData.replace(/\$ /g, '').split(/\n/g)
 
-class TreeNode {
-	constructor(key, value = key, parent = null) {
-		this.key = key;
-		this.value = value;
-		this.parent = parent;
-		this.children = [];
-	}
-
-	get isLeaf() {
-		return this.children.length === 0;
-	}
-
-	get hasChildren() {
-		return !this.isLeaf;
-	}
-}
-
-class Tree {
-	constructor(key, value = key) {
-		this.root = new TreeNode(key, value);
-	}
-
-	*preOrderTraversal(node = this.root) {
-		yield node;
-		if (node.children.length) {
-			for (let child of node.children) {
-				yield* this.preOrderTraversal(child);
-			}
-		}
-	}
-
-	*postOrderTraversal(node = this.root) {
-		if (node.children.length) {
-			for (let child of node.children) {
-				yield* this.postOrderTraversal(child);
-			}
-		}
-		yield node;
-	}
-
-	insert(parentNodeKey, key, value = key) {
-		for (let node of this.preOrderTraversal()) {
-			if (node.key === parentNodeKey) {
-				node.children.push(new TreeNode(key, value, node));
-				return true;
-			}
-		}
-		return false;
-	}
-
-	remove(key) {
-		for (let node of this.preOrderTraversal()) {
-			const filtered = node.children.filter(c => c.key !== key);
-			if (filtered.length !== node.children.length) {
-				node.children = filtered;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	find(key) {
-		for (let node of this.preOrderTraversal()) {
-			if (node.key === key) return node;
-		}
-		return undefined;
-	}
-}
-
-let tree = null
-
-let currentDirectory = ''
+const fs = new FileSystem()
 
 rows.forEach((command, index) => {
 	const [firstArgument, secondArgument] = command.split(' ')
 
-	if (firstArgument === 'ls' || firstArgument === 'dir') {
-		return;
+	if (firstArgument === 'ls') {
+		return
+	}
+
+	if (firstArgument === 'dir') {
+		fs.createDirectory(secondArgument)
+		return
 	}
 
 	if (firstArgument === 'cd') {
 		if (secondArgument === '/') {
-			tree = new Tree(secondArgument, 'dir')
-			currentDirectory = secondArgument
-			return
-		}
-		if (secondArgument === '..') {
-			const root = tree.find(currentDirectory).parent
-			currentDirectory = root?.key || '/'
 			return;
 		}
-
-		tree.insert(currentDirectory, secondArgument, 'dir')
-		currentDirectory = secondArgument
+		if (secondArgument === '..') {
+			fs.goBack()
+			return;
+		}
+		fs.openDirectory(secondArgument)
 		return;
 	}
 
 	const file = firstArgument.match(/\d+/g)
 	const isFile = file.length > 0
-
 	if (isFile) {
-		tree.insert(currentDirectory, secondArgument, +file)
+		fs.createFile(secondArgument, { size: +firstArgument })
 	}
 })
 
-console.log(tree);
+fs.setSizes()
 
-for (let node of tree.preOrderTraversal()) {
-	if (node.key === 'bqpslnv') {
-		console.log(node)
+const availableDiskSpace = 70000000
+const freeSpace = availableDiskSpace - fs.root.size
+const minimumRequiredUpdate = 30000000
+const spaceToDelete = minimumRequiredUpdate - freeSpace
+
+let bigDirs = []
+
+for (let node of fs.preOrderTraversal()) {
+	if (node.size > spaceToDelete && node instanceof Directory) {
+		bigDirs = [...bigDirs, node]
 	}
 }
+
+const sortedBigDirs = bigDirs.sort((a, b) => a.size - b.size)
+
+console.log(sortedBigDirs[0].size);
