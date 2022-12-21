@@ -1,52 +1,94 @@
-import { FileSystem, Directory } from "./helpers.js";
-
-import { stringData } from "./data.js";
+import { stringData, testData } from "./data.js";
 const rows = stringData.replace(/\$ /g, '').split(/\n/g)
 
-const fs = new FileSystem()
+let currentDirectory = null
+
+const tree = {}
 
 rows.forEach((command, index) => {
 	const [firstArgument, secondArgument] = command.split(' ')
 
-	if (firstArgument === 'ls') {
-		return
-	}
-
-	if (firstArgument === 'dir') {
-		fs.createDirectory(secondArgument)
-		return
+	if (firstArgument === 'ls' || firstArgument === 'dir') {
+		return;
 	}
 
 	if (firstArgument === 'cd') {
 		if (secondArgument === '/') {
-			return;
+			tree[secondArgument] = {
+				children: [],
+				parent: null,
+				size: 0
+			}
+			currentDirectory = tree[secondArgument]
+			return
 		}
 		if (secondArgument === '..') {
-			fs.goBack()
+			currentDirectory = currentDirectory.parent
 			return;
 		}
-		fs.openDirectory(secondArgument)
+ 		currentDirectory.children.push({
+			name: secondArgument,
+			parent: currentDirectory,
+			children: [],
+			size: 0
+		})
+		currentDirectory = currentDirectory.children.find(file => file.name === secondArgument)
 		return;
 	}
 
 	const file = firstArgument.match(/\d+/g)
 	const isFile = file.length > 0
+
 	if (isFile) {
-		fs.createFile(secondArgument, { size: +firstArgument })
+		currentDirectory.children.push({
+			name: secondArgument,
+			parent: currentDirectory,
+			size: +file
+		})
 	}
 })
 
-fs.setSizes()
+console.log(tree);
 
+function *postOrderTraversal(node) {
+	if (node.children && node.children) {
+		for (let child of node.children.values()) {
+			yield* postOrderTraversal(child);
+		}
+	}
+
+	yield node;
+}
+
+const root = tree['/']
+
+// first
+for (let node of postOrderTraversal(root)) {
+	if (!!node.parent) {
+		node.parent.size += node.size
+	}
+}
+
+function *preOrderTraversal (node) {
+	yield node;
+
+	if (node.children && node.children) {
+		for (let child of node.children.values()) {
+			yield* preOrderTraversal(child);
+		}
+	}
+}
+
+// second
 const availableDiskSpace = 70000000
-const freeSpace = availableDiskSpace - fs.root.size
+const freeSpace = availableDiskSpace - root.size
 const minimumRequiredUpdate = 30000000
 const spaceToDelete = minimumRequiredUpdate - freeSpace
 
 let bigDirs = []
 
-for (let node of fs.preOrderTraversal()) {
-	if (node.size > spaceToDelete && node instanceof Directory) {
+for (let node of preOrderTraversal(root)) {
+	if (node.size > spaceToDelete && node.children) {
 		bigDirs = [...bigDirs, node]
 	}
 }
