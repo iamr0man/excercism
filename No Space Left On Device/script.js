@@ -1,99 +1,81 @@
 import { stringData, testData } from "./data.js";
+const rows = stringData.replace(/\$ /g, '').split(/\n/g)
 
-let currentDirectory = '';
-let directories = {};
-
-function processLine(line) {
-	let isCommand = line.indexOf('$') === 0;
-
-	if (isCommand) {
-		processCommand(line);
-		return;
-	}
-
-	processEntry(line);
+const getCurrentPath = (directory, secondArgument) => {
+	return directory.name === '/' ? directory.name += secondArgument : directory.name += '/' + secondArgument
 }
 
-function getParentDirectory (currentDirectory, path) {
-	return currentDirectory
-		.split('/')
-		.slice(0, path.length - 1)
-		.join('/')
+const recursivelyCount = (directory, fileSize) => {
+	directory.size += +fileSize
+
+	if (directory.parent !== null) {
+		recursivelyCount(directory.parent, fileSize)
+	}
 }
 
-function processCommand(command) {
-	const directoryCommand = '$ cd ';
+const fs = rows.reduce((fs, command, index) => {
+	const [firstArgument, secondArgument] = command.split(' ')
 
-	if (command.indexOf(directoryCommand) < 0) {
-		return;
+	if (firstArgument === 'ls' || firstArgument === 'dir') {
+		return fs
 	}
 
-	let targetDirectory = command.replace(directoryCommand, '');
-
-	if (targetDirectory === '/') {
-		currentDirectory = '/';
-		return;
-	}
-
-	if (targetDirectory === '..') {
-		const path = currentDirectory.split('/')
-		currentDirectory = getParentDirectory(currentDirectory, path) || '/';
-
-		return;
-	}
-
-	const prefix = currentDirectory === '/' ? '' : '/'
-	currentDirectory += prefix + targetDirectory;
-}
-
-function processEntry(entry) {
-	if (entry.indexOf('dir') === 0) {
-		return;
-	}
-
-	let [size] = entry.split(' ');
-	size = parseInt(size);
-
-	currentDirectory
-		.replace(/\//g, ' / ')
-		.split(' ')
-		.reverse()
-		.reduce((path, directory, index) => {
-			if (!path || (directory === '/' && path !== '/')) {
-				return (getParentDirectory(path, currentDirectory)) || '/';
+	if (firstArgument === 'cd') {
+		if (secondArgument === '/') {
+			const root = {
+				name: '/',
+				parent: null,
+				size: 0
 			}
-
-			if (currentDirectory === '/' && index) {
-				return '/';
+			return {
+				...fs,
+				['/']: root,
+				currentDirectory: root
 			}
-
-			if (!directories[path]) {
-				directories[path] = {
-					size: 0,
-				};
+		}
+		if (secondArgument === '..') {
+			return {
+				...fs,
+				currentDirectory: fs.currentDirectory.parent
 			}
+		}
 
-			directories[path].size += size;
+		const currentPath = getCurrentPath(fs.currentDirectory, secondArgument)
+		const newPathObject = {
+			name: currentPath,
+			parent: fs.currentDirectory,
+			size: 0
+		}
 
-			return path.replace(`/${directory}`, '');
-		}, currentDirectory);
-}
+		return {
+			...fs,
+			[currentPath]: newPathObject,
+			currentDirectory: newPathObject
+		}
+	}
+	const file = firstArgument.match(/\d+/g)
+	const isFile = file.length > 0
 
-stringData.split('\n').forEach(processLine);
+	if (isFile) {
+		recursivelyCount(fs.currentDirectory, file)
+	}
+	return fs
+}, {})
 
-let answer1 = Object.keys(directories)
-	.filter(directory => directories[directory].size <= 100000)
-	.reduce((sizeSum, directory) => sizeSum + directories[directory].size, 0);
+// first
+const directoriesGreaterThen100k = Object.values(fs).reduce((acc, curr) => {
+	if (curr.size > 100000) {
+		return acc
+	}
+	return acc + curr.size
+} ,0)
 
+// second
 const availableDiskSpace = 70000000
-const freeSpace = availableDiskSpace - directories['/'].size
+const freeSpace = availableDiskSpace - fs['/'].size
 const minimumRequiredUpdate = 30000000
 const spaceToDelete = minimumRequiredUpdate - freeSpace
 
-let answer2 = Math.min(
-	...Object.keys(directories)
-		.filter(directory => directories[directory].size >= spaceToDelete)
-		.map(directory => directories[directory].size)
-);
+const sortedBigDirs = Object.values(fs).filter(node => node.size > spaceToDelete).sort((a, b) => a.size - b.size)
 
-console.log(answer1, answer2);
+console.log(sortedBigDirs[0].size);
