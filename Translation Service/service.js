@@ -45,13 +45,12 @@ class TranslationService {
 	batch(texts) {
 		const getTranslationPromise = (text) => this.api.fetch(text).then(value => value.translation)
 
-		return new Promise((resolve, reject) => {
-			if (texts.length === 0) {
-				reject(new BatchIsEmpty())
-			}
-			const promises = texts.map(getTranslationPromise)
-			resolve(Promise.all(promises))
-		}).then((value) => value)
+		if (texts.length === 0) {
+			return Promise.reject(new BatchIsEmpty())
+		}
+
+		const promises = texts.map(getTranslationPromise)
+		return Promise.resolve(Promise.all(promises))
 	}
 
 	/**
@@ -64,7 +63,7 @@ class TranslationService {
 	 * @returns {Promise<void>}
 	 */
 	request(text) {
-		const promisify = () => {
+		const innerRequest = () => {
 			return new Promise((resolve, reject) => {
 				const promiseCallback = (error) => {
 					if (error) return reject(error)
@@ -74,9 +73,9 @@ class TranslationService {
 				this.api.request(text, promiseCallback)
 			})
 		}
-		return promisify()
-			.catch(promisify)
-			.catch(promisify)
+		return innerRequest()
+			.catch(innerRequest)
+			.catch(innerRequest)
 	}
 
 	/**
