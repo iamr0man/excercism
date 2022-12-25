@@ -1,3 +1,14 @@
+export const stack =
+'[P]     [C]         [M]            \n' +
+'[D]     [P] [B]     [V] [S]        \n' +
+'[Q] [V] [R] [V]     [G] [B]        \n' +
+'[R] [W] [G] [J]     [T] [M]     [V]\n' +
+'[V] [Q] [Q] [F] [C] [N] [V]     [W]\n' +
+'[B] [Z] [Z] [H] [L] [P] [L] [J] [N]\n' +
+'[H] [D] [L] [D] [W] [R] [R] [P] [C]\n' +
+'[F] [L] [H] [R] [Z] [J] [J] [D] [D]\n' +
+' 1   2   3   4   5   6   7   8   9 '
+
 export const stringData =
 `move 4 from 9 to 1
 move 6 from 3 to 1

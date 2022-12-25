@@ -1,27 +1,46 @@
-import { stringData } from "./data.js";
+import { stringData, stack } from "./data.js";
+
+const spaceParser = (cell) => {
+	switch (cell.length) {
+		case 5:
+			return [' ', ' ', ' ']
+		case 8:
+			return [' ', ' ', ' ', ' ',]
+		case 9:
+			return [' ', ' ', ' ', ' ', ' ']
+		case 12:
+			return [' ', ' ', ' ', ' ', ' ', ' ',]
+		default:
+			return [cell]
+	}
+}
+
+const rows = stack.split(/\n/g)
+const uglyMatrix = rows.reduce((newMatrix, row, index) => {
+	const uglyRow = row.match(/(\[[\w]]| +)/g)
+	const normalizedRow = uglyRow.map(letter => letter.replace(/\[(\w)]/g, '$1'))
+
+	const newRow = normalizedRow.reduce((acc, letter) => {
+		return [...acc,...spaceParser(letter)]
+	}, [])
+	return [...newMatrix, newRow]
+}, [])
+
+const slicedMatrix = uglyMatrix.slice(0, uglyMatrix.length - 1)
+const matrix = slicedMatrix[0].map((val, index) => slicedMatrix.map(row => row[index]))
+const clearMatrix = matrix.reduce((acc, row) => {
+	const updatedRow = row.filter(cell => cell !== ' ')
+
+	if (updatedRow.length > 0) {
+		return [
+			...acc,
+			[...updatedRow]
+		]
+	}
+	return acc
+}, [])
 
 const stepRows = stringData.split(/\n/g)
-
-// [P]     [C]         [M]
-// [D]     [P] [B]     [V] [S]
-// [Q] [V] [R] [V]     [G] [B]
-// [R] [W] [G] [J]     [T] [M]     [V]
-// [V] [Q] [Q] [F] [C] [N] [V]     [W]
-// [B] [Z] [Z] [H] [L] [P] [L] [J] [N]
-// [H] [D] [L] [D] [W] [R] [R] [P] [C]
-// [F] [L] [H] [R] [Z] [J] [J] [D] [D]
-
-const arrayData = [
-	[ 'P', 'D', 'Q', 'R', 'V', 'B', 'H', 'F', ],
-	[ 'V', 'W', 'Q', 'Z', 'D', 'L'],
-	[ 'C', 'P', 'R', 'G', 'Q', 'Z', 'L', 'H'],
-	[ 'B', 'V', 'J', 'F', 'H', 'D', 'R' ],
-	[ 'C', 'L', 'W', 'Z'],
-	[ 'M', 'V', 'G', 'T', 'N', 'P', 'R', 'J' ],
-	[ 'S', 'B', 'M', 'V', 'L', 'R', 'J' ],
-	[ 'J', 'P', 'D' ],
-	[ 'V', 'W', 'N', 'C', 'D'],
-]
 
 const result = stepRows.reduce((acc, curr) => {
 	const [move, from, to] = curr.match(/\d+/g)
@@ -48,6 +67,6 @@ const result = stepRows.reduce((acc, curr) => {
 		return row
 	})
 
-}, [...arrayData])
+}, [...clearMatrix])
 
 console.log(result.map(v => v[0]).join(''));
